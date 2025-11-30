@@ -8,7 +8,7 @@ VIP_ADMINS = [
     "2572691913",  # Admin 2
     "2522821351",  # Admin 3
     "9316257817",  # Admin 4
-    "13947421096"   # Admin 5
+    "6477391965"   # Admin 5
 ]
 
 DELAY = 4.15  # Speed (Jitna kam number, utna tez spam)
