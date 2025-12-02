@@ -139,12 +139,13 @@ async def lag_team_loop(team_code, key, iv, region):
             print(f"Lag cycle #{count} completed for team: {team_code}")
             
             # Short delay before next cycle
-            await asyncio.sleep(0.01)  # 10 milliseconds between cycles
+            await asyncio.sleep(0.01)  # Speed wahi rahegi
+            await asyncio.sleep(0)     # <--- YEH HAI MAGIC LINE
             
         except Exception as e:
             print(f"Error in lag loop: {e}")
-            # Continue the loop even if there's an error
-            await asyncio.sleep(0.1)
+            lag_running = False  # Loop band karo
+            break                # Turant bahar niklo
  
 ####################################
 
@@ -662,12 +663,13 @@ async def spam_request_loop(target_uid, key, iv, region):
             print(f"Sent request #{count} to {target_uid}")
             
             # Shorter delay between requests
-            await asyncio.sleep(0.5)  # Reduced from 1 second to 0.5 seconds
+            await asyncio.sleep(0.5) 
+            await asyncio.sleep(0)   # <--- YEH MAGIC LINE ADD KARO
             
         except Exception as e:
-            print(f"Error in spam_request_loop for uid {target_uid}: {e}")
-            # Continue with next request instead of breaking
-            await asyncio.sleep(0.5)
+            print(f"Error: Connection Lost in Spam Loop! Stopping...")
+            spam_request_running = False
+            break  # Error aate hi ruk jao
 
 # NEW FUNCTION: Evolution emote spam with mapping
 async def evo_emote_spam(uids, number, key, iv, region):
