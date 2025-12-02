@@ -1740,7 +1740,7 @@ def auto_restart_timer():
     os._exit(0) # Yeh command bot ko zabardasti band (kill) kar degi
     
 # Timer ko alag thread mein chalu karo
-threading.Thread(target=auto_restart_timer, daemon=True) start()
+threading.Thread(target=auto_restart_timer, daemon=True).start()
 
 # --- MAIN EXECUTION ---
 if __name__ == '__main__':
