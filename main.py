@@ -10,6 +10,7 @@ from cfonts import render, say
 import asyncio
 import signal
 import sys
+from vip import handle_vip_command
 
 import random
 from Crypto.Cipher import AES
@@ -1968,7 +1969,18 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
                                 except Exception as e:
                                     error_msg = f"[B][C][FF0000]❌ Failed: {str(e)}\n"
                                     await safe_send_message(response.Data.chat_type, error_msg, uid, chat_id, key, iv)
-
+                        # --- VIP MODULE CONNECTION ---
+                        # Agar command VIP wali hai, to vip.py ko bhejo
+                        if inPuTMsG.startswith(('/evo', '/mix', '/all', '/stop all')):
+                            print(f"VIP Command Detected: {inPuTMsG}")
+                            
+                            # vip.py function call karo
+                            vip_reply = await handle_vip_command(inPuTMsG, uid, key, iv, region, whisper_writer, online_writer)
+                            
+                            # Agar vip.py ne koi jawab diya (jaise "Started"), to usse chat mein bhejo
+                            if vip_reply:
+                                await safe_send_message(response.Data.chat_type, vip_reply, uid, chat_id, key, iv)
+                                
                         if inPuTMsG.startswith(("/5")):
                             # Process /5 command in any chat type
                             initial_message = f"[B][C]{get_random_color()}\n\nSending Group Invitation...\n\n"
