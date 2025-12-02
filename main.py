@@ -220,34 +220,55 @@ def get_player_info(player_id):
         return {
             "error": f"Failed to fetch data: {response.status_code}"
         }
-#CHAT WITH AI
+#CHAT WITH AI - UPDATED (Google Gemini + Backup)
 def talk_with_ai(question):
-    url = f"https://gemini-api-api-v2.vercel.app/prince/api/v1/ask?key=prince&ask={question}"
-    res = requests.get(url)
-    if res.status_code == 200:
-        data = res.json()
-        msg = data["message"]["content"]
-        return msg
-    else:
-        return "An error occurred while connecting to the server."
-#SPAM REQUESTS
-def spam_requests(player_id):
-    # This URL now correctly points to the Flask app you provided
-    url = f"https://like2.vercel.app/send_requests?uid={player_id}&server={server2}&key={key2}"
+    # --- PLAN A: OFFICIAL GOOGLE GEMINI API (BEST) ---
+    # Tumhari Personal API Key yahan hai
+    api_key = "AIzaSyDnml_SBD8GD1L0q68cPdNTHDETLoCWefg" 
+    
     try:
-        res = requests.get(url, timeout=20) # Added a timeout
+        # Google ka official API URL (Flash model gaming ke liye fast hai)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        
+        # Headers aur Data set kar rahe hain
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{
+                "parts": [{"text": question}]
+            }]
+        }
+        
+        # Request bhej rahe hain
+        # json=payload likhne se python khud json.dumps kar lega
+        response = requests.post(url, headers=headers, json=payload, timeout=8)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Google ka response structure check karke text nikalna
+            if "candidates" in data and len(data["candidates"]) > 0:
+                msg = data["candidates"][0]["content"]["parts"][0]["text"]
+                return msg.strip()
+                
+    except Exception as e:
+        print(f"Plan A (Google) Failed: {e}")
+        # Agar Google fail hua to code rukega nahi, niche Plan B pe jayega
+
+    # --- PLAN B: BACKUP FREE AI (POLLINATIONS) ---
+    # Ye tab chalega jab Google key kaam nahi karegi
+    try:
+        # Space ko URL friendly bana rahe hain
+        safe_question = question.replace(" ", "%20")
+        backup_url = f"https://text.pollinations.ai/{safe_question}"
+        
+        res = requests.get(backup_url, timeout=10)
         if res.status_code == 200:
-            data = res.json()
-            # Return a more descriptive message based on the API's JSON response
-            return f"API Status: Success [{data.get('success_count', 0)}] Failed [{data.get('failed_count', 0)}]"
-        else:
-            # Return the error status from the API
-            return f"API Error: Status {res.status_code}"
-    except requests.exceptions.RequestException as e:
-        # Handle cases where the API isn't running or is unreachable
-        print(f"Could not connect to spam API: {e}")
-        return "Failed to connect to spam API."
-####################################
+            return res.text.strip()
+            
+    except Exception as e:
+        print(f"Plan B Failed: {e}")
+
+    # Agar dono fail ho gaye
+    return "AI server is busy right now. Please try again later."
 
 # ** NEW INFO FUNCTION using the new API **
 def newinfo(uid):
