@@ -1045,16 +1045,34 @@ def get_player_info(player_id):
         return {
             "error": f"Failed to fetch data: {response.status_code}"
         }
-#CHAT WITH AI
+#CHAT WITH AI (Updated)
 def talk_with_ai(question):
-    url = f"https://gemini-api-api-v2.vercel.app/prince/api/v1/ask?key=prince&ask={question}"
-    res = requests.get(url)
-    if res.status_code == 200:
-        data = res.json()
-        msg = data["message"]["content"]
-        return msg
-    else:
-        return "An error occurred while connecting to the server."
+    # Apna Google Gemini API Key niche double quotes ke andar dalein
+    api_key = "AIzaSyAW9_pS7JMrnf_Nvx-IqnRPdDyITLciQqc" 
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    payload = {
+        "contents": [{
+            "parts": [{"text": question}]
+        }]
+    }
+    
+    try:
+        # Note: Google API POST request leta hai, GET nahi
+        res = requests.post(url, headers=headers, json=payload)
+        
+        if res.status_code == 200:
+            data = res.json()
+            # Google API ka response structure alag hota hai
+            msg = data["candidates"][0]["content"]["parts"][0]["text"]
+            return msg
+        else:
+            return f"API Error: {res.status_code} - Check API Key"
+    except Exception as e:
+        return f"Connection Error: {str(e)}"
 #SPAM REQUESTS
 def spam_requests(player_id):
     # This URL now correctly points to the Flask app you provided
