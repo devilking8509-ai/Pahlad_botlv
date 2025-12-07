@@ -1045,44 +1045,58 @@ def get_player_info(player_id):
         return {
             "error": f"Failed to fetch data: {response.status_code}"
         }
-## CHAT WITH AI (Gemini 1.5 Flash - Fast & Stable)
+## CHAT WITH AI (Universal Integration: Gemini + GPT-4o + Claude + Free OpenSource)
 def talk_with_ai(question):
-    # Render Environment se key uthayega
+    # --- LAYER 1: GOOGLE GEMINI (Priority High) ---
     api_key = os.environ.get("GEMINI_API_KEY")
     
-    if not api_key:
-        return "System Error: API Key not found. Please set GEMINI_API_KEY in Render."
+    # Duniya bhar ke saare Google Gemini Models ki list
+    # Code ek fail hone par dusra try karega
+    gemini_models = [
+        "gemini-1.5-flash",       # Fastest
+        "gemini-1.5-pro",         # Smartest
+        "gemini-1.0-pro",         # Stable
+        "gemini-pro",             # Legacy
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-pro-latest",
+        "gemini-1.5-flash-001",
+        "gemini-1.5-pro-001"
+    ]
 
-    # Maine yahan model change karke 'gemini-1.5-flash' kar diya hai
-    # Ye model 404 error nahi dega
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-    
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    payload = {
-        "contents": [{
-            "parts": [{"text": question}]
-        }]
-    }
-    
+    if api_key:
+        headers = {'Content-Type': 'application/json'}
+        payload = {"contents": [{"parts": [{"text": question}]}]}
+
+        for model in gemini_models:
+            try:
+                # Har model ko try karo
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+                res = requests.post(url, headers=headers, json=payload, timeout=8)
+                
+                if res.status_code == 200:
+                    data = res.json()
+                    if "candidates" in data and len(data["candidates"]) > 0:
+                        return data["candidates"][0]["content"]["parts"][0]["text"]
+            except:
+                continue # Fail hua to chupchap agle model par jao
+
+    # --- LAYER 2: POLLINATIONS.AI (Free GPT-4o & Claude Proxy) ---
+    # Agar Google fail ho gaya ya Key limit khatam ho gayi, to ye chalega.
+    # Ye bina kisi Key ke chalta hai!
     try:
-        res = requests.post(url, headers=headers, json=payload)
+        # Pollinations AI free mein GPT/Claude ka text deta hai
+        # Hum URL encoding use kar rahe hain taaki spaces handle ho sakein
+        encoded_q = requests.utils.quote(question)
+        url_pollinations = f"https://text.pollinations.ai/{encoded_q}"
         
-        if res.status_code == 200:
-            data = res.json()
-            if "candidates" in data and len(data["candidates"]) > 0:
-                msg = data["candidates"][0]["content"]["parts"][0]["text"]
-                return msg
-            else:
-                return "AI response empty."
-        else:
-            # Agar ab bhi error aaye to ye hame batayega kyun
-            return f"Server Error: {res.status_code} - {res.text}"
-            
-    except Exception as e:
-        return f"Connection Error: {str(e)}"
+        res = requests.get(url_pollinations, timeout=15)
+        if res.status_code == 200 and len(res.text) > 1:
+            return res.text
+    except:
+        pass
+
+    # --- LAYER 3: BACKUP (Basic Response) ---
+    return "Server Error: Google Gemini aur OpenSource Backup dono busy hain. Thodi der baad try karein."
 #SPAM REQUESTS
 def spam_requests(player_id):
     # This URL now correctly points to the Flask app you provided
